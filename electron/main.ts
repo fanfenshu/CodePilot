@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage, dialog } from 'electron';
+import { app, BrowserWindow, nativeImage, dialog, shell, ipcMain } from 'electron';
 import path from 'path';
 import { spawn, execFileSync, ChildProcess } from 'child_process';
 import fs from 'fs';
@@ -290,6 +290,11 @@ function createWindow(port: number) {
     mainWindow = null;
   });
 }
+
+// IPC handler: show file/folder in Finder/Explorer
+ipcMain.handle('show-item-in-folder', (_event, itemPath: string) => {
+  shell.showItemInFolder(itemPath);
+});
 
 app.whenReady().then(async () => {
   // Load user's full shell environment (API keys, PATH, etc.)

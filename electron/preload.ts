@@ -1,4 +1,4 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   versions: {
@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     node: process.versions.node,
     chrome: process.versions.chrome,
   },
+  showItemInFolder: (path: string) => ipcRenderer.invoke('show-item-in-folder', path),
 });

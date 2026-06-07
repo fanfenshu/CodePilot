@@ -45,6 +45,26 @@ export interface FilePreview {
 }
 
 // ==========================================
+// File Operation Types
+// ==========================================
+
+export type FileOperationAction = 'create_file' | 'create_dir' | 'delete' | 'rename';
+
+export interface FileOperationRequest {
+  action: FileOperationAction;
+  path: string;
+  newPath?: string;  // for rename
+  content?: string;  // for create_file
+  baseDir?: string;  // security: limit operations to this directory
+}
+
+export interface FileOperationResponse {
+  success: boolean;
+  path?: string;
+  error?: string;
+}
+
+// ==========================================
 // Task Types
 // ==========================================
 

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NavRail } from "./NavRail";
 import { ChatListPanel } from "./ChatListPanel";
+import { FileBrowserPanel } from "./FileBrowserPanel";
 import { RightPanel } from "./RightPanel";
 import { PanelContext, type PanelContent } from "@/hooks/usePanel";
 
@@ -14,10 +15,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const [chatListOpen, setChatListOpenRaw] = useState(false);
+  const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
+  const [fileBrowserRoot, setFileBrowserRoot] = useState("");
 
   // Panel state
   const isChatRoute = pathname.startsWith("/chat/") || pathname === "/chat";
   const isChatDetailRoute = pathname.startsWith("/chat/");
+
+  // Load home directory on mount for file browser
+  useEffect(() => {
+    fetch("/api/files/browse")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.current) {
+          setFileBrowserRoot(data.current);
+        }
+      })
+      .catch(() => {
+        // Fallback: empty root
+      });
+  }, []);
 
   // Auto-close chat list when leaving chat routes
   const setChatListOpen = useCallback((open: boolean) => {
@@ -83,8 +100,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <NavRail
             chatListOpen={chatListOpen}
             onToggleChatList={() => setChatListOpen(!chatListOpen)}
+            fileBrowserOpen={fileBrowserOpen}
+            onToggleFileBrowser={() => setFileBrowserOpen(!fileBrowserOpen)}
           />
           <ChatListPanel open={chatListOpen} />
+          <FileBrowserPanel open={fileBrowserOpen} rootDir={fileBrowserRoot} />
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
             {/* Electron draggable title bar region */}
             <div

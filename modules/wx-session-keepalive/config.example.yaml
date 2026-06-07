@@ -1,0 +1,21 @@
+# 微信会话保活配置示例
+#
+# 使用方式：
+#   cp config.example.yaml config.yaml
+#   # 修改路径后运行：
+#   python3 wx_session_refresh.py --config config.yaml
+
+# cookies 存储文件（JSON 格式）
+cookie_file: /path/to/data/wx_cookies.json
+
+# token 存储文件（YAML 格式，包含 token、cookie 字符串、过期信息）
+token_file: /path/to/data/wx_token.yaml
+
+# Playwright 浏览器类型：webkit / firefox / chromium
+browser_type: webkit
+
+# Playwright 浏览器安装目录（可选，不填则使用系统默认）
+# browsers_path: /path/to/playwright-browsers
+
+# 日志文件（可选，通过 crontab 重定向更灵活）
+# log_file: /path/to/wx-refresh.log

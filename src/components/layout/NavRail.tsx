@@ -9,6 +9,7 @@ import type { IconSvgElement } from "@hugeicons/react";
 import {
   Message02Icon,
   PlusSignIcon,
+  Folder01Icon,
   GridIcon,
   Settings02Icon,
   Moon02Icon,
@@ -25,15 +26,33 @@ import { cn } from "@/lib/utils";
 interface NavRailProps {
   chatListOpen: boolean;
   onToggleChatList: () => void;
+  fileBrowserOpen: boolean;
+  onToggleFileBrowser: () => void;
 }
 
-const navItems = [
-  { href: "/chat", label: "Chats", icon: Message02Icon },
-  { href: "/extensions", label: "Extensions", icon: GridIcon },
-  { href: "/settings", label: "Settings", icon: Settings02Icon },
-] as const;
+type NavItemType = "link" | "toggle-chat" | "toggle-files";
 
-export function NavRail({ chatListOpen, onToggleChatList }: NavRailProps) {
+interface NavItem {
+  id: string;
+  label: string;
+  icon: typeof Message02Icon;
+  type: NavItemType;
+  href?: string;
+}
+
+const navItems: NavItem[] = [
+  { id: "chats", href: "/chat", label: "Chats", icon: Message02Icon, type: "toggle-chat" },
+  { id: "files", label: "Files", icon: Folder01Icon, type: "toggle-files" },
+  { id: "extensions", href: "/extensions", label: "Extensions", icon: GridIcon, type: "link" },
+  { id: "settings", href: "/settings", label: "Settings", icon: Settings02Icon, type: "link" },
+];
+
+export function NavRail({
+  chatListOpen,
+  onToggleChatList,
+  fileBrowserOpen,
+  onToggleFileBrowser,
+}: NavRailProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
@@ -70,54 +89,81 @@ export function NavRail({ chatListOpen, onToggleChatList }: NavRailProps) {
       {/* Nav icons */}
       <nav className="flex flex-1 flex-col items-center gap-1">
         {navItems.map((item) => {
-          const isActive =
-            item.href === "/chat"
-              ? pathname === "/chat" || pathname.startsWith("/chat/")
-              : item.href === "/extensions"
+          let isActive = false;
+          if (item.type === "toggle-chat") {
+            isActive = chatListOpen || isChatRoute;
+          } else if (item.type === "toggle-files") {
+            isActive = fileBrowserOpen;
+          } else if (item.href) {
+            isActive =
+              item.href === "/extensions"
                 ? pathname.startsWith("/extensions")
                 : pathname === item.href || pathname.startsWith(item.href + "?");
+          }
+
+          const renderButton = () => {
+            if (item.type === "toggle-chat") {
+              return (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-9 w-9",
+                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                  )}
+                  onClick={() => {
+                    if (!isChatRoute) {
+                      router.push("/chat");
+                      onToggleChatList();
+                    } else {
+                      onToggleChatList();
+                    }
+                  }}
+                >
+                  <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
+                  <span className="sr-only">{item.label}</span>
+                </Button>
+              );
+            }
+
+            if (item.type === "toggle-files") {
+              return (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-9 w-9",
+                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                  )}
+                  onClick={onToggleFileBrowser}
+                >
+                  <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
+                  <span className="sr-only">{item.label}</span>
+                </Button>
+              );
+            }
+
+            return (
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-9 w-9",
+                  isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                )}
+              >
+                <Link href={item.href!}>
+                  <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
+                  <span className="sr-only">{item.label}</span>
+                </Link>
+              </Button>
+            );
+          };
 
           return (
-            <Tooltip key={item.href}>
-              <TooltipTrigger asChild>
-                {item.href === "/chat" ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "h-9 w-9",
-                      isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-                    )}
-                    onClick={() => {
-                      if (!isChatRoute) {
-                        // Navigate to chat page first, then open chat list
-                        router.push("/chat");
-                        onToggleChatList();
-                      } else {
-                        onToggleChatList();
-                      }
-                    }}
-                  >
-                    <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
-                    <span className="sr-only">{item.label}</span>
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      "h-9 w-9",
-                      isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <HugeiconsIcon icon={item.icon} className="h-4 w-4" />
-                      <span className="sr-only">{item.label}</span>
-                    </Link>
-                  </Button>
-                )}
-              </TooltipTrigger>
+            <Tooltip key={item.id}>
+              <TooltipTrigger asChild>{renderButton()}</TooltipTrigger>
               <TooltipContent side="right">{item.label}</TooltipContent>
             </Tooltip>
           );

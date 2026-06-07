@@ -1,0 +1,17 @@
+# ChatGPT Bridge 配置文件
+# 复制为 config.yaml 并修改
+
+# 数据目录（存放 token 和 cookies）
+data_dir: /home/deploy/data/chatgpt-bridge
+
+# Token 文件路径
+token_file: /home/deploy/data/chatgpt-bridge/chatgpt_token.json
+
+# Cookies 文件路径（Playwright 格式）
+cookies_file: /home/deploy/data/chatgpt-bridge/chatgpt_cookies.json
+
+# Bridge 服务端口
+port: 9019
+
+# 监听地址（127.0.0.1 = 仅本机，0.0.0.0 = 所有）
+host: 127.0.0.1
